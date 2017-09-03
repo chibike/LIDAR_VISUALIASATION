@@ -3,7 +3,7 @@ import serial
 
 class HokuyoLidarObject(object):
     def __init__(self, port, baud):
-        self.serial = serial.Serial(port, baud, timeout=0.1)
+        self.serial = serial.Serial(port, baud, timeout=0.065)
         self.changeVersion()
 
     def isActive(self):

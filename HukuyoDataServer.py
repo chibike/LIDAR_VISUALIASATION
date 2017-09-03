@@ -2,6 +2,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from SocketServer import ThreadingMixIn
 import threading
 import argparse
+import json
 import re
 import cgi
 
@@ -49,7 +50,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         device = HokuyoLidarObject.HokuyoLidarObject('/dev/ttyACM0', 115200);
-        self.wfile.write(str(device.getSample()))
+        self.wfile.write(json.dumps(device.getSample()))
         device.close()
     else:
       self.send_response(403)

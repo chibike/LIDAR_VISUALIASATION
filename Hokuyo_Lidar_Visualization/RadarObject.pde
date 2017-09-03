@@ -90,6 +90,117 @@ class RadarObject
     //ellipse(this.needle_x_origin, this.needle_y_origin, this.needle_max_length*2+6, this.needle_max_length*2+6);
   }
   
+  public float[] getDataAtPoint(int x, int y)
+  {
+    float distance = 0.0;
+    float angle = (this.min_angle + this.min_angle)/2.0;
+    
+    if (y < this.center_y)
+    {
+      if (x < this.center_x)
+      {
+        //section 1
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = -1.0 * degrees(atan((float)x/y));
+      }
+      else if (x > this.center_x)
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = degrees(atan((float)x/y));
+      }
+      else
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = 0.0;
+        //distance = y;
+      }
+    }
+    else if (y > this.center_y)
+    {
+      if (x < this.center_x)
+      {
+        //section 3
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = -1.0 * (90.0 + degrees(atan((float)y/x)));
+      }
+      else if (x > this.center_x)
+      {
+        //section 4
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = 90.0 + degrees(atan((float)y/x));
+      }
+      else
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = 180.0;
+        //distance = y;
+      }
+    }
+    else
+    {
+      if (x < this.center_x)
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = -90.0;
+        //distance = x;
+      }
+      else if (x > this.center_x)
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = 90.0;
+        //distance = x;
+      }
+      else
+      {
+        //section 2
+        x = abs(x - this.center_x);
+        y = abs(y - this.center_y);
+        
+        angle = 0.0;
+        //distance = 0;
+      }
+    }
+    
+    // scale distance
+    distance = sqrt( pow(x, 2) + pow(y, 2) );
+    distance = map(min(abs(distance), this.needle_max_length), 0, this.needle_max_length, 0, this.max_detectable_distance);
+    //println(x+", "+y);
+    
+    float[] data = new float[3];
+    data[0] = distance; // distance to cursor from origin
+    data[1] = angle; // angle of cursor from origin
+    data[2] = 0; // distance to next obstacle at that angle
+    
+    if (angle >= this.min_angle && angle <= this.max_angle)
+    {
+      int step_index = int(map(angle, this.min_angle, this.max_angle, 0, this.number_of_steps-1));
+      data[2] = this.data[step_index];
+    }
+    
+    return data;
+  }
+  
   protected void update()
   {
     if (this.data_index >= this.number_of_steps)
