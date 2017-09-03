@@ -1,0 +1,68 @@
+class QuickRadarObject extends RadarObject
+{
+  protected int[][] points;
+  
+  QuickRadarObject(int min_detectable_distance, int max_detectable_distance, int distance_threshold, int max_width, int max_height, int center_x, int center_y, float min_angle, float max_angle, float step_angle) throws Exception
+  {
+    super(min_detectable_distance, max_detectable_distance, distance_threshold, max_width, max_height, center_x, center_y, min_angle, max_angle, step_angle);
+    
+    points = new int[this.number_of_steps][2];
+  }
+  
+  @Override
+  public void updateData(int data[])
+  {
+    /* ensure there is enough data */
+    if (data.length < this.number_of_steps) { return; }
+    this.data = data;
+  }
+  
+  @Override
+  protected void update()
+  {
+    pushMatrix();
+    translate(this.needle_x_origin, this.needle_y_origin);
+    rotate(-HALF_PI);
+    
+    /* Delete previous drawing */
+    noStroke();fill(0, 0, 0);
+    ellipse(0,0, this.needle_max_length*6, this.needle_max_length*2+6);
+    
+    /* Draw radar border */
+    strokeWeight(2); stroke(255, 0, 0);
+    ellipse(0,0, this.needle_max_length*2, this.needle_max_length*2);
+    
+    fill(255,0,0);
+    beginShape();
+    
+    this.needle_angle = this.min_angle;
+    this.onNeedleStart();
+    int x = 0; int y = 0;
+    int distance = 0;
+    
+    for (int i=0; i<this.number_of_steps; i++)
+    {
+      try
+      {
+         distance = int(map(this.data[i], this.min_detectable_distance, this.max_detectable_distance, this.needle_min_length, this.needle_max_length));
+      }
+      catch (NullPointerException e)
+      {
+         distance = int(map(this.min_detectable_distance, this.min_detectable_distance, this.max_detectable_distance, this.needle_min_length, this.needle_max_length));
+      }
+      
+      x = int(((float)distance * cos( radians((float)this.needle_angle) )));
+      y = int(((float)distance * sin( radians((float)this.needle_angle) )));
+      
+      vertex(x, y);
+      
+      /* update needle angle */
+      this.prev_needle_angle = this.needle_angle;
+      this.needle_angle += this.step_angle;
+    }
+    endShape(CLOSE);
+    
+    popMatrix();
+    this.onNeedleEnd();
+  }
+};
